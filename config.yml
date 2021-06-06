@@ -9,6 +9,6 @@ server:
 ssl:
   enabled: no
   generate_self_signed: yes
-#  If generate_self_signed is `NO`, enabled the below 2 keys & specify the path
+#  If generate_self_signed is `NO`; enable the below 2 keys & specify the path
 #  key_file: key.pem
 #  cert_file: cert.pem
