@@ -1,7 +1,9 @@
 /// Parse Settings from a configuration yaml file
-use serde::{Deserialize, Deserializer};
-
+use crate::server::cert::generate_cert;
+use serde::{de, Deserialize, Deserializer};
 use std::{net::IpAddr, path::Path};
+use std::fs::File;
+use std::io::Read;
 
 type Error = String;
 
@@ -48,7 +50,10 @@ impl Settings {
                 .unwrap(),
             Err(e) => return Err(e.to_string().replace("\"", "")),
         };
-        Ok(cfg.try_into().unwrap())
+        match cfg.try_into() {
+            Ok(c) => Ok(c),
+            Err(e) => Err(e.to_string())
+        }
     }
 }
 
@@ -106,8 +111,8 @@ pub struct SslConfig {
 
     // Not to be included in config file
     // hidden and for use with rocket app
-    pub pem_certificate: Option<String>,
-    pub pem_private_key: Option<String>,
+    pub pem_certificate: Option<Vec<u8>>,
+    pub pem_private_key: Option<Vec<u8>>,
 }
 
 impl Default for SslConfig {
@@ -169,5 +174,39 @@ fn configure_ssl<'de, D>(deserializer: D) -> Result<Option<SslConfig>, D::Error>
     where
         D: Deserializer<'de>,
 {
-
+    let ssl_config: Option<SslConfig> = Option::deserialize(deserializer)?;
+    match ssl_config {
+        Some(mut s) => {
+            if s.enabled && s.generate_self_signed {
+                // SSL is enabled, and generate self signed certificate is enabled
+                let certs = generate_cert();
+                s.pem_certificate = Some(certs.x509_certificate.to_pem().unwrap());
+                s.pem_private_key = Some(certs.private_key.private_key_to_pem_pkcs8().unwrap());
+            } else if s.enabled && !s.generate_self_signed {
+                // SSL is enabled, and generate self signed certificate is disabled
+                if s.key_file.is_empty() || s.cert_file.is_empty() {
+                    return Err(de::Error::custom("key_file and/or cert_file is empty"))
+                } else if !Path::new(&s.key_file).is_file() || !Path::new(&s.cert_file).is_file() {
+                    return Err(de::Error::custom("key_file and/or cert_file not available"))
+                } else {
+                    // read key
+                    let mut key = Vec::new();
+                    {
+                        let mut kf = File::open(&s.key_file).unwrap();
+                        kf.read_to_end(&mut key);
+                    }
+                    // read certificate
+                    let mut cert = Vec::new();
+                    {
+                        let mut cf = File::open(&s.cert_file).unwrap();
+                        cf.read_to_end(&mut cert);
+                    }
+                    s.pem_certificate = Some(cert);
+                    s.pem_private_key = Some(key);
+                }
+            }
+            Ok(Some(s))
+        },
+        None => Ok(None)
+    }
 }

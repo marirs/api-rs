@@ -1,14 +1,15 @@
 [package]
 name = "apirs"
-version = "0.1.0"
+version = "0.1.1"
 description = "Barebones API server using Rocket.rs"
+keywords = ["ssl", "api", "rust", "rocket"]
 authors = ["Marirs <marirs@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 clap = "3.0.0-beta.2"
 config = "0.11"
-ip2location = "0.1"
+openssl = "0.10"
 
 [dependencies.serde]
 version = "1.0"

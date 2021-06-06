@@ -1,9 +1,12 @@
+#![allow(unused_must_use)]
 use std::path::Path;
 use clap::{crate_authors, crate_version, Clap};
 use rocket::{Build, Config, Rocket, data::Limits};
 
 use self::config::Settings;
 
+/// Self Signed certificate generation
+mod cert;
 /// All required Guards
 mod guards;
 /// All the Routes/endpoints
@@ -47,7 +50,7 @@ fn parse_settings_from_cli() -> Result<Settings, Error> {
 
 pub async fn init_server() -> Result<Rocket<Build>, Error> {
     let settings = parse_settings_from_cli()?;
-    println!("Settings: {:?}", settings);
+
     let limits = Limits::new()
         .limit("forms", settings.server.forms_limit.into())
         .limit("json", settings.server.json_limit.into());
@@ -58,6 +61,28 @@ pub async fn init_server() -> Result<Rocket<Build>, Error> {
         .merge(("limits", limits))
         .merge(("secret_key", (settings.server.secret_key.as_str())))
         .merge(("keep_alive", settings.server.keep_alive as u32));
+
+    // Configure SSL status for the api server
+    let rocket_cfg = if let Some(ssl_cfg) = settings.ssl {
+        if ssl_cfg.enabled {
+            // ssl is enabled
+            if ssl_cfg.pem_certificate.is_some() && ssl_cfg.pem_private_key.is_some() {
+                // merge the certs & key into rocket config
+                rocket_cfg
+                    .merge(("tls.certs", ssl_cfg.pem_certificate))
+                    .merge(("tls.key", ssl_cfg.pem_private_key))
+            } else {
+                // ssl certificate info not available
+                return Err("Error getting ssl certificates".to_string())
+            }
+        } else {
+            // ssl not enabled
+            rocket_cfg
+        }
+    } else {
+        // no ssl configuration
+        rocket_cfg
+    };
 
     // Configure the Rocket server with configured settings
     let app = rocket::custom(rocket_cfg);
