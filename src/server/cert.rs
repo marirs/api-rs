@@ -27,7 +27,7 @@ const ISSUER: &str = "My Organisation";
 /// Issuer Alternate Name
 const ISSUER_ALT: &str = "My Organisation";
 /// SSL Validity
-const VALIDITY: u32 = 30 * 1; // 30 days
+const VALIDITY: u32 = 30; // 30 days
 
 pub fn generate_cert() -> ResultCert {
     //! Generates a SSL Certificate
