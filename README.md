@@ -8,5 +8,27 @@ If you are looking for an API server with database and api key verification etc,
 ### Requirements
 - Rust 1.52+ (Stable)
 
+### Running
+- Build
+```bash
+cargo b
+```
+
+- Run  
+
+Start with server defaults
+```bash
+cargo run
+```
+
+Start with a config file
+```bash
+cargo run -- -c config.yml
+```
+
+#### Generate SSL cert
+```bash
+sudo openssl req -x509 -nodes -days 30 -newkey rsa:2048 -keyout key.pem -out cert.pem
+```
 ---
 License: MIT
