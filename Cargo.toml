@@ -1,0 +1,38 @@
+[package]
+name = "apirs"
+version = "0.1.0"
+description = "Barebones API server using Rocket.rs"
+authors = ["Marirs <marirs@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "3.0.0-beta.2"
+config = "0.11"
+ip2location = "0.1"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[dependencies.tokio]
+version = "1.5"
+features = ["rt", "sync"]
+
+[dependencies.rocket]
+version = "0.5.0-dev"
+git = "https://github.com/SergioBenitez/Rocket"
+features = ["json", "secrets", "tls"]
+
+[[bin]]
+name = "apirs"
+path = "src/main.rs"
+
+[profile.dev]
+opt-level = 3
+
+[profile.release]
+codegen-units = 1
+debug-assertions = false
+debug = false
+opt-level = 3
+lto = true
