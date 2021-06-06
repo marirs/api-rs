@@ -41,8 +41,7 @@ pub fn generate_cert() -> ResultCert {
     let pkey = PKey::from_rsa(rsa).unwrap();
 
     let mut name = X509Name::builder().unwrap();
-    name.append_entry_by_nid(Nid::COMMONNAME, CN)
-        .unwrap();
+    name.append_entry_by_nid(Nid::COMMONNAME, CN).unwrap();
     name.append_entry_by_nid(Nid::DISTINGUISHEDNAME, DN)
         .unwrap();
     name.append_entry_by_nid(Nid::SUBJECT_ALT_NAME, SUB_ALT_NAME)
@@ -68,5 +67,8 @@ pub fn generate_cert() -> ResultCert {
     builder.sign(&pkey, MessageDigest::sha256()).unwrap();
 
     let certificate: X509 = builder.build();
-    ResultCert { x509_certificate: certificate, private_key: pkey }
+    ResultCert {
+        x509_certificate: certificate,
+        private_key: pkey,
+    }
 }

@@ -1,4 +1,4 @@
-use crate::server::{guards::ClientInfo, config::ServerConfig};
+use crate::server::{config::ServerConfig, guards::ClientInfo};
 use rocket::{http::Status, serde::json::Value, State};
 
 #[get("/")]
@@ -12,9 +12,9 @@ pub async fn hello_world(client_info: ClientInfo) -> (Status, Value) {
 
 #[get("/<name>")]
 pub async fn hello_name(
-    name: &str, // parameter
-    client_info: ClientInfo,    // get client guard information
-    _settings: &State<ServerConfig> // Get the Server config from settings
+    name: &str,                      // parameter
+    client_info: ClientInfo,         // get client guard information
+    _settings: &State<ServerConfig>, // Get the Server config from settings
 ) -> (Status, Value) {
     //! Hello <name> endpoint with remote client ip & browser info
     json_response!(

@@ -1,9 +1,7 @@
 /// Parse Settings from a configuration yaml file
 use crate::server::cert::generate_cert;
 use serde::{de, Deserialize, Deserializer};
-use std::{net::IpAddr, path::Path};
-use std::fs::File;
-use std::io::Read;
+use std::{fs::File, io::Read, net::IpAddr, path::Path};
 
 type Error = String;
 
@@ -29,9 +27,7 @@ pub struct Settings {
     /// Server config related parameters
     #[serde(default, deserialize_with = "configure_ssl")]
     pub ssl: Option<SslConfig>,
-
     // Any more sections from the config.yml goes in here
-
 }
 
 impl Settings {
@@ -52,7 +48,7 @@ impl Settings {
         };
         match cfg.try_into() {
             Ok(c) => Ok(c),
-            Err(e) => Err(e.to_string())
+            Err(e) => Err(e.to_string()),
         }
     }
 }
@@ -123,7 +119,7 @@ impl Default for SslConfig {
             key_file: SSL_KEY_FILE.into(),
             cert_file: SSL_CERT_FILE.into(),
             pem_certificate: None,
-            pem_private_key: None
+            pem_private_key: None,
         }
     }
 }
@@ -171,8 +167,8 @@ fn default_ssl_cert_file() -> String {
 }
 
 fn configure_ssl<'de, D>(deserializer: D) -> Result<Option<SslConfig>, D::Error>
-    where
-        D: Deserializer<'de>,
+where
+    D: Deserializer<'de>,
 {
     let ssl_config: Option<SslConfig> = Option::deserialize(deserializer)?;
     match ssl_config {
@@ -185,9 +181,9 @@ fn configure_ssl<'de, D>(deserializer: D) -> Result<Option<SslConfig>, D::Error>
             } else if s.enabled && !s.generate_self_signed {
                 // SSL is enabled, and generate self signed certificate is disabled
                 if s.key_file.is_empty() || s.cert_file.is_empty() {
-                    return Err(de::Error::custom("key_file and/or cert_file is empty"))
+                    return Err(de::Error::custom("key_file and/or cert_file is empty"));
                 } else if !Path::new(&s.key_file).is_file() || !Path::new(&s.cert_file).is_file() {
-                    return Err(de::Error::custom("key_file and/or cert_file not available"))
+                    return Err(de::Error::custom("key_file and/or cert_file not available"));
                 } else {
                     // read key
                     let mut key = Vec::new();
@@ -206,7 +202,7 @@ fn configure_ssl<'de, D>(deserializer: D) -> Result<Option<SslConfig>, D::Error>
                 }
             }
             Ok(Some(s))
-        },
-        None => Ok(None)
+        }
+        None => Ok(None),
     }
 }

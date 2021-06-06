@@ -1,20 +1,20 @@
 #![allow(unused_must_use)]
-use std::path::Path;
 use clap::{crate_authors, crate_version, Clap};
-use rocket::{Build, Config, Rocket, data::Limits};
+use rocket::{data::Limits, Build, Config, Rocket};
+use std::path::Path;
 
 use self::config::Settings;
 
-/// Self Signed certificate generation
-mod cert;
-/// All required Guards
-mod guards;
-/// All the Routes/endpoints
-mod controllers;
 /// Catchers like 500, 501, 404, etc
 mod catchers;
+/// Self Signed certificate generation
+mod cert;
 /// Server & App Configurations
 pub(crate) mod config;
+/// All the Routes/endpoints
+mod controllers;
+/// All required Guards
+mod guards;
 
 type Error = String;
 
@@ -73,7 +73,7 @@ pub async fn init_server() -> Result<Rocket<Build>, Error> {
                     .merge(("tls.key", ssl_cfg.pem_private_key))
             } else {
                 // ssl certificate info not available
-                return Err("Error getting ssl certificates".to_string())
+                return Err("Error getting ssl certificates".to_string());
             }
         } else {
             // ssl not enabled
